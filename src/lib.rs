@@ -65,9 +65,7 @@ impl<'a> UnityFsMeta<'a> {
         let metadata = metadata.decompress();
         let metadata = match Metadata::parse(&metadata) {
             Ok((_, metadata)) => metadata,
-            Err(nom::Err::Error((_, e))) => return Err(nom::Err::Error((input, e))),
-            Err(nom::Err::Failure((_, e))) => return Err(nom::Err::Failure((input, e))),
-            Err(nom::Err::Incomplete(n)) => return Err(nom::Err::Incomplete(n)),
+            Err(e) => return Err(e.map(|e| nom::error::Error::new(input, e.code))),
         };
 
         let mut left = input;

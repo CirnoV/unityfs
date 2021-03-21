@@ -14,10 +14,10 @@ members = ["crates/wasm-unityfs", "crates/etcdec"]
 lazy_static = "1.4.0"
 
 [dependencies.nom]
-version = "5.0.0"
+version = "6"
 default-features = false
 features = ["std"]
 
 [dependencies.serde]
-version = "1.0.104"
+version = "1.0"
 features = ["derive"]

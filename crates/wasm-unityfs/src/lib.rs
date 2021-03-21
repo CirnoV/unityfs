@@ -1,7 +1,7 @@
 use js_sys::{Array, Error, Object, Reflect, TypeError, Uint8Array};
 use wasm_bindgen::prelude::*;
 
-use image::dxt;
+use image::codecs::dxt;
 use unityfs::Data;
 
 #[wasm_bindgen]
@@ -176,7 +176,7 @@ impl Texture2D {
             .map_err(|e| Error::new(&format!("failed to build decoder: {}", e)))?;
         let image = image::DynamicImage::from_decoder(dec)
             .map_err(|e| Error::new(&format!("failed to decode: {}", e)))?;
-        let image = image.flipv().into_rgba();
+        let image = image.flipv().into_rgba8();
         Ok(image.into_vec())
     }
 

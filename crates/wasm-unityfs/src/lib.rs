@@ -26,7 +26,6 @@ impl UnityFs {
         let name = asset.name();
         let objects = asset
             .objects()
-            .iter()
             .map(UnityObject::from_object)
             .map(JsValue::from)
             .collect::<Array>();

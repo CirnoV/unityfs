@@ -3,9 +3,10 @@ mod type_tree;
 use crate::common_parser::read_string;
 use crate::util::align;
 use std::borrow::Cow;
+use std::collections::{btree_map, BTreeMap};
 
 use nom::{
-    i16, i32,
+    i16, i32, i64,
     number::{complete as nom_number, Endianness},
     u32, u64, IResult,
 };
@@ -21,14 +22,14 @@ pub struct Asset<'b> {
     format: u32,
     data_offset: u32,
     tree: TypeMetadata<'b>,
-    objects: Vec<Object<'b>>,
+    objects: BTreeMap<i64, Object<'b>>,
     adds: Vec<(u64, i32)>,
     refs: Vec<AssetRef<'b>>,
 }
 
 #[derive(Debug)]
 pub struct Object<'b> {
-    pub path_id: u64,
+    pub path_id: i64,
     pub type_id: i32,
     pub class_id: i32,
     pub is_destroyed: bool,
@@ -77,9 +78,9 @@ impl<'b> Asset<'b> {
                     input_out
                 };
                 let (input, path_id) = if format >= 14 || long_object_ids {
-                    u64!(input, endianness)?
+                    i64!(input, endianness)?
                 } else {
-                    let (input, id) = u32!(input, endianness)?;
+                    let (input, id) = i32!(input, endianness)?;
                     (input, id.into())
                 };
                 let (input, object_data_offset) = u32!(input, endianness)?;
@@ -120,15 +121,18 @@ impl<'b> Asset<'b> {
                     input
                 };
                 input_out = input;
-                Ok(Object {
+                Ok((
                     path_id,
-                    type_id,
-                    class_id,
-                    is_destroyed,
-                    data,
-                })
+                    Object {
+                        path_id,
+                        type_id,
+                        class_id,
+                        is_destroyed,
+                        data,
+                    },
+                ))
             })
-            .collect::<Result<Vec<_>, _>>()?;
+            .collect::<Result<BTreeMap<_, _>, _>>()?;
 
         let (input, adds) = if format >= 11 {
             let (mut input_out, add_count) = u32!(input_out, endianness)?;
@@ -198,7 +202,7 @@ impl<'b> Asset<'b> {
         &self.name
     }
 
-    pub fn objects(&self) -> &[Object<'b>] {
-        &self.objects
+    pub fn objects(&self) -> btree_map::Values<i64, Object> {
+        self.objects.values()
     }
 }

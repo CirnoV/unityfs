@@ -205,4 +205,8 @@ impl<'b> Asset<'b> {
     pub fn objects(&self) -> btree_map::Values<i64, Object> {
         self.objects.values()
     }
+
+    pub fn get_object(&self, path_id: &i64) -> Option<&Object> {
+        self.objects.get(path_id)
+    }
 }

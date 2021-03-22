@@ -225,15 +225,20 @@ impl<'a> TypeTree<'a> {
 }
 
 #[derive(Serialize)]
-#[serde(tag = "type", content = "data")]
+// #[serde(tag = "type", content = "data")]
+#[serde(untagged)]
 pub enum Data<'b> {
     GenericPrimitive {
+        #[serde(skip)]
         type_name: Cow<'b, str>,
+        #[serde(flatten)]
         data: Cow<'b, [u8]>,
     },
     GenericArray(Vec<Data<'b>>),
     GenericStruct {
+        #[serde(skip)]
         type_name: Cow<'b, str>,
+        #[serde(flatten)]
         fields: HashMap<Cow<'b, str>, Data<'b>>,
     },
     Bool(bool),

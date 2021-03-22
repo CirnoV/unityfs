@@ -36,6 +36,38 @@ pub struct Object<'b> {
     pub data: Data<'b>,
 }
 
+impl<'b> Object<'b> {
+    pub fn type_name(&self, asset: &'b Asset) -> Cow<'b, str> {
+        match &self.data {
+            Data::GenericStruct {
+                type_name, fields, ..
+            } if type_name == "MonoBehaviour" => {
+                if let Some(Data::GenericStruct { fields, .. }) = fields.get("m_Script") {
+                    if let Some(Data::SInt64(path_id)) = fields.get("m_PathID") {
+                        if let Some(Object {
+                            data: Data::GenericStruct { fields, .. },
+                            ..
+                        }) = asset.get_object(path_id)
+                        {
+                            if let Some(Data::String(s)) = fields.get("m_ClassName") {
+                                return String::from_utf8_lossy(s);
+                            }
+                        }
+                    }
+                }
+                Cow::Owned(format!(
+                    "{}(Unknown: {})",
+                    type_name.to_owned(),
+                    self.path_id
+                ))
+            }
+            Data::GenericPrimitive { type_name, .. } => type_name.to_owned(),
+            Data::GenericStruct { type_name, .. } => type_name.to_owned(),
+            _ => unreachable!(),
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct AssetRef<'b> {
     asset_path: Cow<'b, str>,

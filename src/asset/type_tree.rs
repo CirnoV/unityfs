@@ -7,7 +7,7 @@ use nom::{
 };
 use serde::Serialize;
 use std::borrow::Cow;
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 #[derive(Debug)]
 pub struct TypeTree<'a> {
@@ -206,7 +206,7 @@ impl<'a> TypeTree<'a> {
                     input = left;
                     Ok((field_type.name.clone(), data))
                 })
-                .collect::<Result<HashMap<_, _>, _>>()?;
+                .collect::<Result<BTreeMap<_, _>, _>>()?;
             (
                 input,
                 Data::GenericStruct {
@@ -239,7 +239,7 @@ pub enum Data<'b> {
         #[serde(skip)]
         type_name: Cow<'b, str>,
         #[serde(flatten)]
-        fields: HashMap<Cow<'b, str>, Data<'b>>,
+        fields: BTreeMap<Cow<'b, str>, Data<'b>>,
     },
     Bool(bool),
     UInt8(u8),
